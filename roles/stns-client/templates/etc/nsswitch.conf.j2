@@ -1,0 +1,21 @@
+passwd:     sss files stns
+shadow:     files sss stns
+group:      sss files stns
+
+hosts:      files dns myhostname
+
+bootparams: nisplus [NOTFOUND=return] files
+
+ethers:     files
+netmasks:   files
+networks:   files
+protocols:  files
+rpc:        files
+services:   files sss
+
+netgroup:   nisplus sss
+
+publickey:  nisplus
+
+automount:  files nisplus
+aliases:    files nisplus

@@ -1,0 +1,2 @@
+api_end_point: https://stns-api-id.execute-api.ap-northeast-1.amazonaws.com/v2
+auth_token: oreno-my-stns-token-001

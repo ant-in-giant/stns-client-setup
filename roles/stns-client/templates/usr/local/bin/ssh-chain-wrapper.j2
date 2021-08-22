@@ -1,0 +1,10 @@
+#!/bin/bash
+# まずは STNS での公開鍵取得を試みる
+pubkeys=$(/usr/lib/stns/stns-key-wrapper $1)
+# 失敗したらもともと指定されていた Amazon Linux 2 用のコマンドにフォールバック
+if [ $? -ne 0 ]; then
+  /usr/bin/timeout 5s /opt/aws/bin/eic_run_authorized_keys $1 $2
+  #/usr/bin/timeout 5s /opt/aws/bin/curl_authorized_keys $1 $2
+else
+  echo "$pubkeys"
+fi
