@@ -26,6 +26,7 @@
     ]
     state: present
   become: yes
+  when: check_stns_repo.stat.exists == true and check_stns_repo.stat.isreg == true
 
 - name: Modify /etc/stns/client/stns.conf
   template :
