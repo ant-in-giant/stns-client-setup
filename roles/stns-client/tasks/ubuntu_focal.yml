@@ -43,25 +43,6 @@
     - ansible_distribution_major_version == "20"
     - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
 
-#- name: Download STNS installer
-#  uri:
-#    url: https://repo.stns.jp/scripts/apt-repo.sh
-#    return_content: yes
-#  register: stns_installer
-#  when:
-#    - ansible_distribution == "Ubuntu"
-#    - ansible_distribution_major_version == "20"
-#    - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
-#
-#- name: Run STNS installer
-#  shell:
-#    cmd: sh
-#    stdin: "{{ stns_installer }}"
-#  when:
-#    - ansible_distribution == "Ubuntu"
-#    - ansible_distribution_major_version == "20"
-#    - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
-
 - name: Install STNS modules
   apt:
     name: [
@@ -74,7 +55,6 @@
   when:
     - ansible_distribution == "Ubuntu"
     - ansible_distribution_major_version == "20"
-    - check_stns_repo.stat.exists == true and check_stns_repo.stat.isreg == true
 
 - name: Modify /etc/stns/client/stns.conf
   template :
@@ -103,6 +83,19 @@
     src=roles/stns-client/templates/etc/nsswitch.conf.focal.j2
     dest=/etc/nsswitch.conf
     backup=yes
+  become: yes
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+
+- name: Place /usr/local/bin/ssh-chain-wrapper
+  template :
+    src: usr/local/bin/ssh-chain-wrapper.j2
+    dest: /usr/local/bin/ssh-chain-wrapper
+    owner: root
+    group: root
+    mode: 0755
+    backup: yes
   become: yes
   when:
     - ansible_distribution == "Ubuntu"
