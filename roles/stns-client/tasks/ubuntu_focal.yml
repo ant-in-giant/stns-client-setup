@@ -90,7 +90,7 @@
 
 - name: Place /usr/local/bin/ssh-chain-wrapper
   template :
-    src: usr/local/bin/ssh-chain-wrapper.j2
+    src: usr/local/bin/ssh-chain-wrapper.focal.j2
     dest: /usr/local/bin/ssh-chain-wrapper
     owner: root
     group: root
