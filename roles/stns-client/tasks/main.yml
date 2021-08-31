@@ -2,3 +2,7 @@
 - include: amazonlinux2.yml
   when: ansible_distribution == "Amazon"
 
+- include: ubuntu_focal.yml
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"

@@ -1,0 +1,78 @@
+---
+- name: Check STNS repo
+  stat:
+    path: /etc/apt.repos.d/stns.repo
+  register: check_stns_repo
+
+- name: Download STNS installer
+  uri:
+    url: https://repo.stns.jp/scripts/apt-repo.sh
+    return_content: yes
+  register: stns_installer
+  when: check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
+
+- name: Run STNS installer
+  shell:
+    cmd: sh
+    stdin: {{ stns_installer }}
+  when: check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
+
+- name: Install STNS modules
+  apt:
+    name: [
+      'stns-v2',
+      'libnss-stns-v2',
+      'cache-stnsd',
+    ]
+    state: present
+  become: yes
+
+- name: Modify /etc/stns/client/stns.conf
+  template :
+    src: etc/stns/client/stns.conf.j2
+    dest: /etc/stns/client/stns.conf
+    owner: root
+    group: root
+    mode: 0666
+    backup: yes
+  become: yes
+
+- name: Modify /etc/pam.d/sshd
+  lineinfile: dest=/etc/pam.d/sshd line="{{item}}" backup=yes
+  with_items:
+   - 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022'
+  become: yes
+
+- name: Modify /etc/nsswitch.conf
+  copy : >
+    src=roles/stns-client/templates/etc/nsswitch.conf.focal.j2
+    dest=/etc/nsswitch.conf
+    backup=yes
+  become: yes
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+
+- name: Enable service cache-stnsd, and not touch the state
+  service:
+    name: cache-stnsd
+    enabled: yes
+
+- name: Start service cache-stnsd, if not started
+  service:
+    name: cache-stnsd
+    state: started
+
+- name: Modify /etc/ssh/sshd_config
+  template :
+    src: etc/ssh/sshd_config.focal.j2
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0600
+    backup: yes
+  become: yes
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+  notify: "restart sshd"
