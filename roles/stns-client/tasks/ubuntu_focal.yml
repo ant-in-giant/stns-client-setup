@@ -19,13 +19,13 @@
     - ansible_distribution_major_version == "20"
     - check_dl_dir.stat.exists != true or check_dl_dir.stat.isdir != true
 
-- name: Check STNS repo
-  stat:
-    path: /etc/apt.repos.d/stns.repo
-  register: check_stns_repo
-  when:
-    - ansible_distribution == "Ubuntu"
-    - ansible_distribution_major_version == "20"
+#- name: Check STNS repo
+#  stat:
+#    path: /etc/apt.repos.d/stns.repo
+#  register: check_stns_repo
+#  when:
+#    - ansible_distribution == "Ubuntu"
+#    - ansible_distribution_major_version == "20"
 
 - name: Download STNS installer
   get_url:
@@ -41,7 +41,7 @@
   when:
     - ansible_distribution == "Ubuntu"
     - ansible_distribution_major_version == "20"
-    - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
+    #- check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
 
 - name: Install STNS modules
   apt:
