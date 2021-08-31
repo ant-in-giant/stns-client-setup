@@ -3,19 +3,28 @@
   stat:
     path: /etc/apt.repos.d/stns.repo
   register: check_stns_repo
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
 
 - name: Download STNS installer
   uri:
     url: https://repo.stns.jp/scripts/apt-repo.sh
     return_content: yes
   register: stns_installer
-  when: check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+    - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
 
 - name: Run STNS installer
   shell:
     cmd: sh
     stdin: "{{ stns_installer }}"
-  when: check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+    - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
 
 - name: Install STNS modules
   apt:
@@ -26,7 +35,10 @@
     ]
     state: present
   become: yes
-  when: check_stns_repo.stat.exists == true and check_stns_repo.stat.isreg == true
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+    - check_stns_repo.stat.exists == true and check_stns_repo.stat.isreg == true
 
 - name: Modify /etc/stns/client/stns.conf
   template :
@@ -37,12 +49,18 @@
     mode: 0666
     backup: yes
   become: yes
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
 
 - name: Modify /etc/pam.d/sshd
   lineinfile: dest=/etc/pam.d/sshd line="{{item}}" backup=yes
   with_items:
    - 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022'
   become: yes
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
 
 - name: Modify /etc/nsswitch.conf
   copy : >
@@ -58,11 +76,17 @@
   service:
     name: cache-stnsd
     enabled: yes
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
 
 - name: Start service cache-stnsd, if not started
   service:
     name: cache-stnsd
     state: started
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
 
 - name: Modify /etc/ssh/sshd_config
   template :

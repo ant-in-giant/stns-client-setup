@@ -10,6 +10,7 @@
   stat:
     path: /tmp/Downloads
   register: check_dl_dir
+  when: check_al2.rc == 0
 
 - name: Make directory for Downloads
   file:
@@ -30,6 +31,7 @@
   stat:
     path: "/tmp/Downloads/cache-stnsd-{{cache_stnsd_version}}-1.x86_64.el7.rpm"
   register: check_cache_stnsd
+  when: check_al2.rc == 0
 
 - name: Install cache-stnsd
   yum:
@@ -48,6 +50,7 @@
   stat:
     path: "/tmp/Downloads/libnss-stns-v2-{{libnss_version}}-1.x86_64.el7.rpm"
   register: check_libnss_stns
+  when: check_al2.rc == 0
 
 - name: Install libnss-stns
   yum:
@@ -69,6 +72,7 @@
   with_items:
    - 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022'
   become: yes
+  when: check_al2.rc == 0
 
 - name: Modify /etc/stns/client/stns.conf
   template :
@@ -79,6 +83,7 @@
     mode: 0666
     backup: yes
   become: yes
+  when: check_al2.rc == 0
 
 - name: Place /usr/local/bin/ssh-chain-wrapper
   template :
@@ -95,11 +100,13 @@
   service:
     name: cache-stnsd
     enabled: yes
+  when: check_al2.rc == 0
 
 - name: Start service cache-stnsd, if not started
   service:
     name: cache-stnsd
     state: started
+  when: check_al2.rc == 0
 
 - name: Modify /etc/ssh/sshd_config
   template :
