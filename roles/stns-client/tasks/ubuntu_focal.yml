@@ -1,4 +1,24 @@
 ---
+- name: Check exists Downloads directory
+  stat:
+    path: /tmp/Downloads
+  register: check_dl_dir
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+
+- name: Make directory for Downloads
+  file:
+    path: /tmp/Downloads
+    state: directory
+    owner: root
+    group: root
+    mode: 0777
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+    - check_dl_dir.stat.exists != true or check_dl_dir.stat.isdir != true
+
 - name: Check STNS repo
   stat:
     path: /etc/apt.repos.d/stns.repo
@@ -8,23 +28,39 @@
     - ansible_distribution_major_version == "20"
 
 - name: Download STNS installer
-  uri:
-    url: https://repo.stns.jp/scripts/apt-repo.sh
-    return_content: yes
-  register: stns_installer
+  get_url:
+    url: "https://repo.stns.jp/scripts/apt-repo.sh"
+    dest: /tmp/Downloads
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "20"
+
+- name: Run STNS installer
+  shell:
+    cmd: "sh /tmp/Downloads/apt-repo.sh"
   when:
     - ansible_distribution == "Ubuntu"
     - ansible_distribution_major_version == "20"
     - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
 
-- name: Run STNS installer
-  shell:
-    cmd: sh
-    stdin: "{{ stns_installer }}"
-  when:
-    - ansible_distribution == "Ubuntu"
-    - ansible_distribution_major_version == "20"
-    - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
+#- name: Download STNS installer
+#  uri:
+#    url: https://repo.stns.jp/scripts/apt-repo.sh
+#    return_content: yes
+#  register: stns_installer
+#  when:
+#    - ansible_distribution == "Ubuntu"
+#    - ansible_distribution_major_version == "20"
+#    - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
+#
+#- name: Run STNS installer
+#  shell:
+#    cmd: sh
+#    stdin: "{{ stns_installer }}"
+#  when:
+#    - ansible_distribution == "Ubuntu"
+#    - ansible_distribution_major_version == "20"
+#    - check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
 
 - name: Install STNS modules
   apt:
