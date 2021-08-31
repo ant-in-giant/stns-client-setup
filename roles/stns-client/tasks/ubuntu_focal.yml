@@ -14,7 +14,7 @@
 - name: Run STNS installer
   shell:
     cmd: sh
-    stdin: {{ stns_installer }}
+    stdin: "{{ stns_installer }}"
   when: check_stns_repo.stat.exists != true or check_stns_repo.stat.isreg != true
 
 - name: Install STNS modules
